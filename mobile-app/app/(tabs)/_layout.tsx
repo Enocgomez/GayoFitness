@@ -1,33 +1,78 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
+import { Ionicons } from '@expo/vector-icons';
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
+export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
+
+        tabBarShowLabel: true,
+        tabBarActiveTintColor: '#ef4444',
+        tabBarInactiveTintColor: '#9ca3af',
+
+        tabBarStyle: {
+          backgroundColor: '#fff',
+          borderTopWidth: 0.5,
+          borderTopColor: '#e5e7eb',
+          height: 70,
+          paddingBottom: 10,
+          paddingTop: 6,
+        },
+
+        tabBarLabelStyle: {
+          fontSize: 11,
+          marginTop: 2,
+        },
+      }}
+    >
       <Tabs.Screen
-        name="index"
+        name="dashboard"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: 'Dashboard',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="grid" size={22} color={color} />
+          ),
         }}
       />
+
       <Tabs.Screen
-        name="explore"
+        name="workouts"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: 'Workouts',
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="barbell" size={22} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="recipes"
+        options={{
+          title: 'Recipes',
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="restaurant" size={22} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="trainer"
+        options={{
+          title: 'Trainer',
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="chatbubble-outline" size={22} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="store"
+        options={{
+          title: 'Store',
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="bag-outline" size={22} color={color} />
+          ),
         }}
       />
     </Tabs>
