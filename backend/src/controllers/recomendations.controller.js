@@ -1,12 +1,12 @@
 // const Recommendation = require('../models/Recommendation');
-// const User = require('../models/User');
+// const User = require('../models/Usuario');
 
 const getRecommendations = async (req, res) => {
   try {
     const userId = req.userId;
 
-    // Cuando conectes Mongo real, aquí buscarás el usuario por userId
-    // const user = await User.findById(userId);
+    //Cuando conectes Mongo real, aquí buscarás el usuario por userId
+    const user = await User.findById(userId);
 
     const fakeUser = {
       _id: userId,

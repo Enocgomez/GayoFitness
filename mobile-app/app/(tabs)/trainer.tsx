@@ -11,7 +11,7 @@ import { useState, useRef } from 'react';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { chatIA } from '../../services/api';
+import { chatIA, ChatHistoryMessage } from '../../services/api';
 
 type ChatMessage = {
   role: 'user' | 'ai';
@@ -22,27 +22,24 @@ export default function TrainerScreen() {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: 'ai',
-      text:
-        'Hola 👋 Soy tu entrenador IA. Pregúntame sobre rutinas, dieta, volumen, definición o ejercicios 💪',
+      text: 'Ey mi gallo 🐔💪 aquí no venimos a flojear… venimos a ponernos fuertes 😈 ¿qué quieres entrenar hoy?'
     },
   ]);
 
   const [chatInput, setChatInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [history, setHistory] = useState<ChatHistoryMessage[]>([]);
 
   const scrollRef = useRef<ScrollView>(null);
 
   // ✨ EFECTO TYPING IA
   const typeMessage = async (text: string) => {
     let current = '';
-
     setMessages(prev => [...prev, { role: 'ai', text: '' }]);
 
     for (let i = 0; i < text.length; i++) {
       current += text[i];
-
-      await new Promise(res => setTimeout(res, 10)); // velocidad typing
-
+      await new Promise(res => setTimeout(res, 10));
       setMessages(prev => {
         const updated = [...prev];
         updated[updated.length - 1].text = current;
@@ -58,13 +55,18 @@ export default function TrainerScreen() {
 
     const userMsg: ChatMessage = { role: 'user', text };
     setMessages(prev => [...prev, userMsg]);
-
     setChatInput('');
     setLoading(true);
 
+    const updatedHistory: ChatHistoryMessage[] = [
+      ...history,
+      { role: 'user', content: text },
+    ];
+
     try {
-      const res = await chatIA(text);
+      const res = await chatIA(text, updatedHistory);
       const reply = res?.reply || '🤖 No tengo respuesta ahora mismo.';
+      setHistory([...updatedHistory, { role: 'assistant', content: reply }]);
       await typeMessage(reply);
     } catch (error) {
       console.log('ERROR CHAT:', error);
@@ -76,7 +78,7 @@ export default function TrainerScreen() {
 
   return (
     <ThemedView style={styles.screen}>
-      
+
       {/* HEADER */}
       <ThemedView style={styles.header}>
         <View style={styles.headerRow}>
@@ -85,7 +87,7 @@ export default function TrainerScreen() {
             style={styles.logo}
           />
           <ThemedText type="title" style={styles.headerTitle}>
-            Entrenador IA
+            Gayo Fitness
           </ThemedText>
         </View>
         <ThemedText style={styles.headerSubtitle}>
@@ -142,10 +144,7 @@ export default function TrainerScreen() {
           onSubmitEditing={handleChatSend}
           returnKeyType="send"
         />
-        <TouchableOpacity
-          onPress={handleChatSend}
-          style={styles.sendButton}
-        >
+        <TouchableOpacity onPress={handleChatSend} style={styles.sendButton}>
           <ThemedText style={styles.sendButtonText}>Enviar</ThemedText>
         </TouchableOpacity>
       </View>
@@ -159,7 +158,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f6f8',
   },
-
   header: {
     paddingTop: 18,
     paddingHorizontal: 16,
@@ -168,71 +166,57 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#e6e6e6',
   },
-
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
   },
-
   logo: {
-    width: 30,
-    height: 30,
+    width: 90,
+    height: 90,
   },
-
   headerTitle: {
     fontSize: 22,
   },
-
   headerSubtitle: {
     color: '#6b7280',
     marginTop: 2,
     fontSize: 13,
   },
-
   chatArea: {
     flex: 1,
   },
-
   chatContent: {
     padding: 14,
     paddingBottom: 24,
   },
-
   botRow: {
     alignItems: 'flex-start',
     marginBottom: 12,
   },
-
   userRow: {
     alignItems: 'flex-end',
     marginBottom: 12,
   },
-
   bubble: {
     borderRadius: 18,
     padding: 16,
     maxWidth: '85%',
   },
-
   botBubble: {
     backgroundColor: '#eceff3',
   },
-
   userBubble: {
     backgroundColor: '#ef4444',
   },
-
   botText: {
     color: '#1f2937',
   },
-
   userText: {
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '800',
   },
-
   chatInputBar: {
     flexDirection: 'row',
     padding: 10,
@@ -240,7 +224,6 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#e6e6e6',
   },
-
   chatInput: {
     flex: 1,
     backgroundColor: '#f3f4f6',
@@ -248,7 +231,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 10,
   },
-
   sendButton: {
     backgroundColor: '#ef4444',
     paddingHorizontal: 15,
@@ -256,7 +238,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     justifyContent: 'center',
   },
-
   sendButtonText: {
     color: '#ffffff',
     fontWeight: '900',

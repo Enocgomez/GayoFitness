@@ -11,7 +11,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 
 import {
-  getUser,
+  getLocalUser,
   getTodayStats,
   getWeeklyStats,
   getRecommendations,
@@ -46,12 +46,12 @@ function ProgressRing({ percent }: { percent: number }) {
 
 // 🔴 WEEKLY BARS DINÁMICO
 function WeeklyBars({ data }: { data: number[] }) {
-  const days = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+  const days = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo'];
   const values = data.length ? data : [0, 0, 0, 0, 0, 0, 0];
 
   const maxVal = Math.max(...values, 1);
   const BAR_MAX_HEIGHT = 140;
-  const todayIndex = new Date().getDay() - 1;
+  const todayIndex = (new Date().getDay() + 6) % 7;
 
   return (
     <View style={styles.barContainer}>
@@ -160,7 +160,7 @@ export default function Dashboard() {
   const loadData = async () => {
     try {
       const [userData, today, weekly, recs] = await Promise.all([
-        getUser(),
+        getLocalUser(),
         getTodayStats(),
         getWeeklyStats(),
         getRecommendations(),
@@ -230,7 +230,7 @@ export default function Dashboard() {
             <QuickCard
               icon="🏋️"
               label="Entrenamientos"
-              onPress={() => router.replace('/workouts')}
+              onPress={() => router.replace('/workout')}
             />
             <QuickCard
               icon="🍽️"

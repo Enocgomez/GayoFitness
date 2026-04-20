@@ -5,7 +5,7 @@ require('dotenv').config();
 
 const app = express();
 
-// 🔧 Middlewares
+// Middlewares
 app.use(cors());
 app.use(express.json());
 
@@ -14,18 +14,18 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('Mongo Atlas conectado ✅'))
   .catch(err => console.error('Error MongoDB:', err));
 
-// 📦 Rutas
+// Rutas
 const routes = require('./src/routes/index.js');
 
 // 👉 TODA tu API
 app.use('/api', routes);
 
-// 🧪 Test
+// Test
 app.get('/', (req, res) => {
   res.json({ status: 'Backend funcionando 🚀' });
 });
 
-// 🚀 Servidor
+// Servidor
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor en http://localhost:${PORT}`);

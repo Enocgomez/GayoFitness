@@ -14,7 +14,14 @@ const API_IA =
 
 // 🔹 HEADERS CON TOKEN
 const getHeaders = async () => {
-  const token = await AsyncStorage.getItem('token');
+  let token = await AsyncStorage.getItem('token');
+
+  // 🔥 FIX PARA WEB
+  if (!token && typeof window !== "undefined") {
+    token = localStorage.getItem('token');
+  }
+
+  console.log("TOKEN:", token); // debug
 
   return {
     "Content-Type": "application/json",
@@ -26,7 +33,6 @@ const getHeaders = async () => {
 // 🔹 AUTH
 // ======================
 
-// REGISTER
 export const registerUser = async (
   name: string,
   email: string,
@@ -49,7 +55,6 @@ export const registerUser = async (
   return data;
 };
 
-// LOGIN
 export const loginUser = async (email: string, password: string) => {
   const res = await fetch(`${API_NODE}/auth/login`, {
     method: "POST",
@@ -67,13 +72,11 @@ export const loginUser = async (email: string, password: string) => {
   return data;
 };
 
-// LOGOUT
 export const logoutUser = async () => {
   await AsyncStorage.removeItem('token');
   await AsyncStorage.removeItem('user');
 };
 
-// GET USER LOCAL
 export const getLocalUser = async () => {
   const user = await AsyncStorage.getItem('user');
   return user ? JSON.parse(user) : null;
@@ -112,14 +115,35 @@ export const getRecommendations = async () => {
 // 🔹 IA
 // ======================
 
-export const chatIA = async (message: string) => {
+// Tipo del historial que acepta el backend
+export type ChatHistoryMessage = {
+  role: 'user' | 'assistant';
+  content: string;
+};
+
+export const chatIA = async (
+  message: string,
+  history: ChatHistoryMessage[] = []
+): Promise<{ reply: string }> => {
+
+  // Recuperar datos del usuario para personalizar la IA
+  const user = await getLocalUser();
+
   const res = await fetch(`${API_IA}/chat`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ message }),
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      message,
+      history,          // ✅ historial de conversación
+      stream: false,    // ✅ sin streaming (React Native no soporta SSE fácilmente)
+      name: user?.name ?? null,   // ✅ nombre del usuario para personalizar
+      goal: user?.goal ?? null,   // ✅ objetivo del usuario para personalizar
+    }),
   });
 
-  return await res.json();
+  if (!res.ok) {
+    throw new Error(`Error del servidor: ${res.status}`);
+  }
+
+  return await res.json(); // { reply: "..." }
 };
