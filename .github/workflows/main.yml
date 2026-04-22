@@ -1,15 +1,33 @@
-name: Build iOS Test
+name: Build iOS IPA
 
 on:
   workflow_dispatch:
 
 jobs:
-  test:
+  build:
     runs-on: macos-latest
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Test message
-        run: echo "Workflow funcionando correctamente 🔥"
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install pods
+        run: |
+          cd ios
+          pod install
+
+      - name: Build
+        run: |
+          xcodebuild -workspace ios/*.xcworkspace \
+          -scheme mobile_app \
+          -configuration Release \
+          -sdk iphoneos \
+          build
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: ipa
+          path: ios/build
